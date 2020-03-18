@@ -27,9 +27,6 @@ import org.apache.thrift.TException;
  */
 @Slf4j
 public class CatalogClient {
-    private static final Log log =
-        LogFactory.getLog(CatalogClient.class);
-
 
     private IMetaStoreClient client;
 
