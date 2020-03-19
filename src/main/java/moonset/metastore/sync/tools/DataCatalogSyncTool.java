@@ -6,9 +6,6 @@ import moonset.metastore.sync.exception.MetastoreException;
 import moonset.metastore.sync.parser.ExtendedGnuParser;
 import moonset.metastore.sync.util.CLIArgsTokenizer;
 
-import com.typesafe.config.Config;
-import com.typesafe.config.ConfigFactory;
-
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.cli.*;
@@ -50,6 +47,8 @@ public class DataCatalogSyncTool {
     private static final String SOURCE = "source";
     private static final String HIVE = "hive";
     private static final String DATACATALOG = "datacatalog";
+    private static final String GLUE_REGION = "glue_region";
+    private static final String DEFAULT_GLUE_REGION = "us-east-1";
 
     private static CommandLine parse(final String[] args) throws ParseException {
         Options options = new Options();
@@ -118,6 +117,12 @@ public class DataCatalogSyncTool {
                                         + " or "
                                         + DATACATALOG)
                         .create(SOURCE);
+        Option glueRegion =
+                OptionBuilder.withArgName("glue_region")
+                        .hasArg()
+                        .isRequired(false)
+                        .withDescription("The glue data catalog region")
+                        .create(GLUE_REGION);
 
         options.addOption(localDatabase);
         options.addOption(destTable);
@@ -128,6 +133,7 @@ public class DataCatalogSyncTool {
         options.addOption(allPartitions);
         options.addOption(replaceDestTable);
         options.addOption(allowNoneSourceTable);
+        options.addOption(glueRegion);
 
         CommandLineParser parser = new ExtendedGnuParser(true);
         CommandLine line = parser.parse(options, args);
@@ -144,8 +150,6 @@ public class DataCatalogSyncTool {
     }
 
     public static void main(final String[] args) throws Exception {
-        Config conf = ConfigFactory.load();
-
         long startTime = System.nanoTime();
         CommandLine line = parse(args);
 
@@ -170,7 +174,7 @@ public class DataCatalogSyncTool {
         IMetaStoreClient source, dest;
         MetastoreClientFactory factory = new MetastoreClientFactory();
 
-        String region = conf.getString(MetastoreClientFactory.AWS_GLUE_REGION);
+        String region = line.getOptionValue(GLUE_REGION) == null ? DEFAULT_GLUE_REGION : line.getOptionValue(GLUE_REGION);;
 
         String srcDatabaseName;
         String srcTableName;
