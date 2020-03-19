@@ -1,7 +1,7 @@
 # MoonsetMetastoreSync
 
 To sync between Glue data catalog and EMR's local metastore. The command runs
-on AWS EMR. The following is a sample execution.
+inside AWS EMR. The following is a sample execution.
 
 ```bash
 [hadoop@ip-10-0-168-123 ~]$ curl -LO https://github.com/FBAChinaOpenSource/MoonsetMetastoreSync/releases/download/v0.0.1/MoonsetMetaStoreSync.jar
