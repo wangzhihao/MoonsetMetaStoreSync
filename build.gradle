@@ -7,7 +7,6 @@
  */
 
 plugins {
-  id 'com.github.johnrengelman.shadow' version '5.2.0'
   id "io.freefair.lombok" version "5.0.0-rc6"
 
 }
@@ -46,15 +45,6 @@ dependencies {
 
     // Use JUnit test framework
     testCompile 'junit:junit:4.12'
-}
-
-shadowJar {
-  zip64 true
-   dependencies {
-      exclude(dependency('com.amazonaws:.*:.*'))
-      exclude(dependency('org.apache.hive:.*:.*'))
-      exclude(dependency('org.apache.hadoop:.*:.*'))
-   }
 }
 
 // Define the main class for the application
