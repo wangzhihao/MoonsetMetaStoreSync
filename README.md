@@ -10,7 +10,7 @@ The command runs inside AWS EMR. The following is a sample execution.
 100   615  100   615    0     0   5082      0 --:--:-- --:--:-- --:--:--  5082
 100 31423  100 31423    0     0   166k      0 --:--:-- --:--:-- --:--:--  166k
 
-[hadoop@ip-10-0-168-123 ~]$ java -cp MoonsetMetastoreSync.jar:/usr/lib/hive/lib/*:/usr/lib/hadoop/*:/usr/lib/hadoop-mapreduce/*:/usr/lib/hive/auxlib/*:/usr/share/aws/aws-java-sdk/* moonset.metastore.sync.tools.DataCatalogSyncTool --database zhihaow --table foo --source datacatalog --all_partitions
+[hadoop@ip-10-0-168-123 ~]$ java -cp MoonsetMetastoreSync.jar:/usr/lib/hive/lib/*:/usr/lib/hive/auxlib/*:/usr/lib/hadoop/*:/usr/lib/hadoop-mapreduce/*:/usr/share/aws/aws-java-sdk/* moonset.metastore.sync.tools.DataCatalogSyncTool --database zhihaow --table foo --source datacatalog --all_partitions  
 2020-03-19T00:35:11,694 INFO [main] moonset.metastore.sync.tools.DataCatalogSyncTool - Begin to sync table from datacatalog. Local(Hive) : zhihaow.foo. Remote(Data Catalog) : zhihaow.foo. Partitions: null.
 2020-03-19T00:35:11,719 INFO [main] org.apache.hadoop.hive.conf.HiveConf - Found configuration file null
 
