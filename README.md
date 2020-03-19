@@ -4,13 +4,13 @@ To sync between Glue data catalog and EMR's local metastore. The command runs
 inside AWS EMR. The following is a sample execution.
 
 ```sh
-[hadoop@ip-10-0-168-123 ~]$ curl -LO https://github.com/FBAChinaOpenSource/MoonsetMetastoreSync/releases/download/v0.0.1/MoonsetMetaStoreSync.jar
+[hadoop@ip-10-0-168-123 ~]$ curl -LO https://github.com/FBAChinaOpenSource/MoonsetMetastoreSync/releases/download/v0.0.1/MoonsetMetastoreSync.jar
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
 100   615  100   615    0     0   5082      0 --:--:-- --:--:-- --:--:--  5082
 100 31423  100 31423    0     0   166k      0 --:--:-- --:--:-- --:--:--  166k
 
-[hadoop@ip-10-0-168-123 ~]$ java -cp MoonsetMetaStoreSync.jar:/usr/lib/hive/lib/*:/usr/lib/hadoop/*:/usr/lib/hadoop-mapreduce/*:/usr/lib/hive/auxlib/*:/usr/share/aws/aws-java-sdk/* moonset.metastore.sync.tools.DataCatalogSyncTool --database zhihaow --table foo --source datacatalog --all_partitions
+[hadoop@ip-10-0-168-123 ~]$ java -cp MoonsetMetastoreSync.jar:/usr/lib/hive/lib/*:/usr/lib/hadoop/*:/usr/lib/hadoop-mapreduce/*:/usr/lib/hive/auxlib/*:/usr/share/aws/aws-java-sdk/* moonset.metastore.sync.tools.DataCatalogSyncTool --database zhihaow --table foo --source datacatalog --all_partitions
 2020-03-19T00:35:11,694 INFO [main] moonset.metastore.sync.tools.DataCatalogSyncTool - Begin to sync table from datacatalog. Local(Hive) : zhihaow.foo. Remote(Data Catalog) : zhihaow.foo. Partitions: null.
 2020-03-19T00:35:11,719 INFO [main] org.apache.hadoop.hive.conf.HiveConf - Found configuration file null
 
