@@ -88,4 +88,27 @@ public class MetastoreClientFactory {
             throw new MetastoreException("can't new a metastoreclient.", e);
         }
     }
+
+    /**
+     * Get a datacatlog client across account. 
+     *
+     * @param region the glue service region.
+     * @param assumeRole the role to assume in the target account. 
+     * @return an IMetaStoreClient instance for AWS DataCatalog not on EMR.
+     * @throws MetastoreException if failed to get an IMetaStoreClient istance.
+     */
+    public IMetaStoreClient getDataCatalogClient(final String region, final String assumeRole)
+            throws MetastoreException {
+        try {
+            HiveConf conf = new HiveConf();
+            conf.set(AWSGlueClientFactory.AWS_REGION, region);
+            conf.set(AWSGlueClientFactory.AWS_CATALOG_CREDENTIALS_PROVIDER_FACTORY_CLASS,
+                    "moonset.metastore.sync.RoleBasedAWSCredentialsProviderFactory");
+            conf.set(RoleBasedAWSCredentialsProviderFactory.ASSUME_ROLE, assumeRole);
+
+            return new NoFileSystemOpsAWSCatalogMetastoreClient(conf);
+        } catch (MetaException e) {
+            throw new MetastoreException("can't new a metastoreclient.", e);
+        }
+    }
 }

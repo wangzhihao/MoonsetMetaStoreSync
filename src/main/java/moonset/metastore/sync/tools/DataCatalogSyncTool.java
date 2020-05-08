@@ -16,7 +16,8 @@ import org.apache.hadoop.hive.metastore.IMetaStoreClient;
 /*
  * The command line interface of metastore sync process.
  *
- * commandline --source [hive|datacatlog] --database foo --table foo [--partition foo] [--all-partitions] [--replace-dest-table] [--allow-none-source-table]
+ * commandline --source [hive|datacatlog] --database foo --table foo [--assume_role foo] 
+ *     [--partition foo] [--all_partitions] [--replace_dest_table] [--allow_none_source_table]
  * Here are some examples.
  *
  * To sync table with some partitions:
@@ -24,9 +25,11 @@ import org.apache.hadoop.hive.metastore.IMetaStoreClient;
  * To sync table with no partition:
  * commandline --source [hive|datacatlog] --database foo --table foo
  * To sync table with all partitions:
- * commandline --source [hive|datacatlog] --database foo --table foo --all-partitions
+ * commandline --source [hive|datacatlog] --database foo --table foo --all_partitions
  * To sync table with all partitions:
- * commandline --source [hive|datacatlog] --database foo --table foo --all-partitions
+ * commandline --source [hive|datacatlog] --database foo --table foo --all_partitions
+ * To sync table across account with assume role.
+ * commandline --source [hive|datacatlog] --database foo --table foo --assume_role  arn:aws:iam::542947461172:role/foo-role
  *
  * Now, we only support provide snapshot_date explicitly, and we plan to support start_date and end_date if we find we need that feature.
  */
@@ -41,6 +44,7 @@ public class DataCatalogSyncTool {
     private static final String DATABASE = "database";
     private static final String TABLE = "table";
     private static final String PARTITION = "partition";
+    private static final String ASSUME_ROLE = "assume_role";
     private static final String ALL_PARTITIONS = "all_partitions";
     private static final String REPLACE_DEST_TABLE= "replace_dest_table";
     private static final String ALLOW_NONE_SOURCE_TABLE= "allow_none_source_table";
@@ -78,6 +82,12 @@ public class DataCatalogSyncTool {
                         .isRequired()
                         .withDescription("local table name")
                         .create(TABLE);
+        Option assumeRole =
+                OptionBuilder.withArgName("assume_role")
+                        .hasArg()
+                        .isRequired(false)
+                        .withDescription("cross account with assume role")
+                        .create(ASSUME_ROLE);
         //Partition is optional parameter
         Option partition =
                 OptionBuilder.withArgName("partition")
@@ -86,9 +96,9 @@ public class DataCatalogSyncTool {
                         .withDescription("partition of the table to sync")
                         .create(PARTITION);
 
-        //all-partitions is optional parameter
+        //all_partitions is optional parameter
         Option allPartitions =
-                OptionBuilder.withArgName("all-partitions")
+                OptionBuilder.withArgName("all_partitions")
                         .hasArg(false)
                         .isRequired(false)
                         .withDescription("all partitions of the table to sync")
@@ -100,9 +110,9 @@ public class DataCatalogSyncTool {
                         .isRequired(false)
                         .withDescription("drop the existing local table, and then sync the remote table")
                         .create(REPLACE_DEST_TABLE);
-        //allow-none-source-table is optional parameter, it means to treat it as valid if remote table does not exist.
+        //allow_none_source_table is optional parameter, it means to treat it as valid if remote table does not exist.
         Option allowNoneSourceTable =
-                OptionBuilder.withArgName("allow-none-source-table") // Keep parameter key unchanged for backward compatible.
+                OptionBuilder.withArgName("allow_none_source_table") // Keep parameter key unchanged for backward compatible.
                         .hasArg(false)
                         .isRequired(false)
                         .withDescription("treat it as valid if remote table does not exist")
@@ -128,6 +138,7 @@ public class DataCatalogSyncTool {
         options.addOption(destTable);
         options.addOption(remoteDatabase);
         options.addOption(remoteTable);
+        options.addOption(assumeRole);
         options.addOption(partition);
         options.addOption(source);
         options.addOption(allPartitions);
@@ -157,6 +168,7 @@ public class DataCatalogSyncTool {
         boolean includeAllPartition = line.hasOption(ALL_PARTITIONS);
         boolean isReplaceDestTable = line.hasOption(REPLACE_DEST_TABLE);
         boolean isAllowNoneSourceTable = line.hasOption(ALLOW_NONE_SOURCE_TABLE);
+        boolean isCrossAccount = line.hasOption(ASSUME_ROLE);
         String localDatabaseName = line.getOptionValue(DATABASE);
         String localTableName = line.getOptionValue(TABLE);
         String remoteDatabaseName = line.getOptionValue(REMOTE_DATABASE) == null ? localDatabaseName : line.getOptionValue(REMOTE_DATABASE);
@@ -186,14 +198,26 @@ public class DataCatalogSyncTool {
             srcTableName = remoteTableName;
             destDatabaseName = localDatabaseName;
             destTableName = localTableName;
-            source = factory.getDataCatalogClient(region);
+            if(isCrossAccount) {
+                log.info("Sync across account.");
+                source = factory.getDataCatalogClient(region, line.getOptionValue(ASSUME_ROLE));
+            } else {
+                log.info("Sync in the same account.");
+                source = factory.getDataCatalogClient(region);
+            }
             dest = factory.getHiveMetastoreClient(MetastoreClientFactory.EMR_HIVE_SITE_XML_PATH);
         } else {
             srcDatabaseName = localDatabaseName;
             srcTableName = localTableName;
             destDatabaseName = remoteDatabaseName;
             destTableName = remoteTableName;
-            dest = factory.getDataCatalogClient(region);
+            if(isCrossAccount) {
+                log.info("Sync across account.");
+                dest = factory.getDataCatalogClient(region, line.getOptionValue(ASSUME_ROLE));
+            } else {
+                log.info("Sync in the same account.");
+                dest = factory.getDataCatalogClient(region);
+            }
             source = factory.getHiveMetastoreClient(MetastoreClientFactory.EMR_HIVE_SITE_XML_PATH);
         }
 
